@@ -70,7 +70,7 @@ class _SpellBookScreenState extends State<SpellBookScreen> {
 
   Future<void> _initTts() async {
     await flutterTts.setLanguage("en-US");
-    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setSpeechRate(0.3);
     await flutterTts.setVolume(1.0);
     await flutterTts.setPitch(1.0);
   }

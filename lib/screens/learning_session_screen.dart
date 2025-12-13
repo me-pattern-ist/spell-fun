@@ -31,7 +31,7 @@ class _LearningSessionScreenState extends State<LearningSessionScreen> {
 
   Future<void> _initTts() async {
     await flutterTts.setLanguage("en-US");
-    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setSpeechRate(0.2);
     await flutterTts.setVolume(1.0);
     await flutterTts.setPitch(1.0);
   }
@@ -40,11 +40,7 @@ class _LearningSessionScreenState extends State<LearningSessionScreen> {
     await flutterTts.speak(text);
   }
 
-  Future<void> _pronounceWordTwice(String text) async {
-    await _speak(text);
-    await Future.delayed(const Duration(seconds: 1));
-    await _speak(text);
-  }
+
 
   @override
   void dispose() {
@@ -53,9 +49,6 @@ class _LearningSessionScreenState extends State<LearningSessionScreen> {
   }
 
   void _handleNext() async {
-    // Pronounce the word twice
-    await _pronounceWordTwice(widget.words[_currentIndex].text);
-
     if (!mounted) return;
 
     setState(() {

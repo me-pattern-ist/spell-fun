@@ -33,6 +33,20 @@ class _TracingScreenState extends State<TracingScreen> {
   List<DrawingPoint?> points = [];
 
   @override
+  void initState() {
+    super.initState();
+    _pronounceTwice();
+  }
+
+  void _pronounceTwice() async {
+    if (widget.onPronounce != null) {
+      widget.onPronounce!();
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) widget.onPronounce!();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final textStyle = widget.isCursive
         ? GoogleFonts.cookie(
