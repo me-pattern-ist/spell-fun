@@ -129,6 +129,7 @@ class _SpellBookScreenState extends State<SpellBookScreen> {
             Navigator.pop(context);
           },
           onPronounce: () => _speak(word.text),
+          onPronounceSentence: () => _speak(word.sentence),
           isCursive: _isCursive,
         ),
       ),

@@ -16,11 +16,16 @@ class WordService {
       for (int i = 0; i < lines.length; i++) {
         String line = lines[i].trim();
         if (line.isNotEmpty) {
+          final parts = line.split('|');
+          final text = parts[0].trim();
+          final sentence = parts.length > 1 ? parts[1].trim() : "This is a word.";
+          
           words.add(Word(
             id: '${i + 1}',
-            text: line,
-            meaning: 'A word: $line', // Placeholder
-            imageUrl: 'assets/${line.toLowerCase()}.png', // Placeholder
+            text: text,
+            meaning: 'A word: $text', // Placeholder
+            sentence: sentence,
+            imageUrl: 'assets/${text.toLowerCase()}.png', // Placeholder
             difficulty: 1,
           ));
         }

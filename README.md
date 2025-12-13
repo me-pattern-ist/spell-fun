@@ -3,8 +3,8 @@
 A fun game for kids to learn spellings.
 
 ## Command not for agent:
-/Users/sherakhan/.gemini/antigravity/scratch/spell_learning_game_flutter
 
+dart run tool/generate_sentences.dart will generate new sentences for all words in all_words.csv
 
 flutter clean
 

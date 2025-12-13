@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/word.dart';
-import 'dart:ui' as ui;
 
 class DrawingPoint {
   final Offset offset;
@@ -14,6 +13,7 @@ class TracingScreen extends StatefulWidget {
   final Word word;
   final VoidCallback onNext;
   final VoidCallback? onPronounce;
+  final VoidCallback? onPronounceSentence;
   final bool isCursive;
 
   const TracingScreen({
@@ -21,6 +21,7 @@ class TracingScreen extends StatefulWidget {
     required this.word,
     required this.onNext,
     this.onPronounce,
+    this.onPronounceSentence,
     this.isCursive = false,
   });
 
@@ -126,6 +127,32 @@ class _TracingScreenState extends State<TracingScreen> {
                 ),
               ),
             ),
+            if (widget.word.sentence.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        widget.word.sentence,
+                        style: GoogleFonts.comicNeue(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple.shade800,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    if (widget.onPronounceSentence != null)
+                      IconButton(
+                        icon: const Icon(Icons.volume_up, color: Colors.purple),
+                        onPressed: widget.onPronounceSentence,
+                        tooltip: 'Listen to sentence',
+                      ),
+                  ],
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Row(

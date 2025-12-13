@@ -78,9 +78,11 @@ class _LearningSessionScreenState extends State<LearningSessionScreen> {
     final currentWord = widget.words[_currentIndex];
 
     return TracingScreen(
+      key: ValueKey(currentWord.id),
       word: currentWord,
       onNext: _handleNext,
       onPronounce: () => _speak(currentWord.text),
+      onPronounceSentence: () => _speak(currentWord.sentence),
       isCursive: widget.isCursive,
     );
   }
