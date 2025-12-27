@@ -10,6 +10,11 @@ run `dart run tool/generate_sentences.dart` will generate new sentences for all 
 
 Run this command to categorize your words `python3 tool/assign_themes.py`
 
+Default: Generates 5 stories.
+All Stories: Run python3 tool/generate_stories.py --limit -1
+Custom Limit: Run python3 tool/generate_stories.py --limit 10
+
+
 Generate stories and images: `python3 tool/generate_stories.py`
 
 Generate New Images (Optional): `python3 tool/generate_images.py`
