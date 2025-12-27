@@ -4,7 +4,9 @@ A fun game for kids to learn spellings.
 
 ## Command not for agent:
 
-dart run tool/generate_sentences.dart will generate new sentences for all words in all_words.csv
+Update raw.csv with new words.
+
+run `dart run tool/generate_sentences.dart` will generate new sentences for all words in all_words.csv
 
 flutter clean
 

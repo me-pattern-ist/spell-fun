@@ -1,29 +1,47 @@
 import 'dart:convert';
 import 'dart:io';
 
-const String csvPath = 'assets/all_words.csv';
+const String rawCsvPath = 'assets/raw.csv';
+const String outputCsvPath = 'assets/all_words.csv';
 const String ollamaUrl = 'http://localhost:11434/api/generate';
 const String modelName = 'llama3.2:latest'; // Default model, can be changed
 
 void main() async {
-  final file = File(csvPath);
-  if (!await file.exists()) {
-    print('Error: $csvPath not found.');
+  final rawFile = File(rawCsvPath);
+  if (!await rawFile.exists()) {
+    print('Error: $rawCsvPath not found.');
     exit(1);
   }
 
-  final lines = await file.readAsLines();
+  // Read raw words
+  final rawLines = await rawFile.readAsLines();
+  final List<String> rawWords = [];
+  for (var line in rawLines) {
+    if (line.trim().isEmpty || line.toLowerCase().contains('spell check')) continue;
+    rawWords.add(line.trim());
+  }
+
+  // Read existing sentences to cache them
+  final outputFile = File(outputCsvPath);
+  final Map<String, String> existingSentences = {};
+  if (await outputFile.exists()) {
+    final outputLines = await outputFile.readAsLines();
+    for (var line in outputLines) {
+      if (line.trim().isEmpty) continue;
+      final parts = line.split('|');
+      if (parts.length > 1) {
+        existingSentences[parts[0].trim()] = parts[1].trim();
+      }
+    }
+  }
+
   final List<String> newLines = [];
   final client = HttpClient();
 
-  print('Processing words...');
+  print('Processing ${rawWords.length} words...');
 
-  for (var line in lines) {
-    if (line.trim().isEmpty) continue;
-
-    final parts = line.split('|');
-    final word = parts[0].trim();
-    String sentence = parts.length > 1 ? parts[1].trim() : '';
+  for (var word in rawWords) {
+    String sentence = existingSentences[word] ?? '';
 
     if (sentence.isEmpty || sentence == "This is a word.") {
       print('Generating sentence for: $word');
@@ -38,13 +56,15 @@ void main() async {
       } catch (e) {
         print('  -> Error: $e');
       }
+    } else {
+      print('Skipping generation for: $word (already exists)');
     }
 
     newLines.add('$word|$sentence');
   }
 
-  await file.writeAsString(newLines.join('\n'));
-  print('Done! Updated $csvPath');
+  await outputFile.writeAsString(newLines.join('\n'));
+  print('Done! Updated $outputCsvPath');
   client.close();
 }
 
