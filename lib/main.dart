@@ -6,6 +6,8 @@ import 'screens/tracing_screen.dart';
 import 'screens/learning_session_screen.dart';
 import 'services/word_service.dart';
 import 'screens/story_screen.dart';
+import 'screens/math_menu_screen.dart';
+import '../constants.dart';
 
 void main() {
   runApp(const SpellLearningGame());
@@ -71,7 +73,7 @@ class _SpellBookScreenState extends State<SpellBookScreen> {
 
   Future<void> _initTts() async {
     await flutterTts.setLanguage("en-US");
-    await flutterTts.setSpeechRate(0.3);
+    await flutterTts.setSpeechRate(kTtsSpeechRate);
     await flutterTts.setVolume(1.0);
     await flutterTts.setPitch(1.0);
   }
@@ -229,6 +231,22 @@ class _SpellBookScreenState extends State<SpellBookScreen> {
                   label: const Text('Story Watch'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MathMenuScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.calculate, size: 32),
+                  label: const Text('Math Fun'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
