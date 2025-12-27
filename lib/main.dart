@@ -5,6 +5,7 @@ import 'models/word.dart';
 import 'screens/tracing_screen.dart';
 import 'screens/learning_session_screen.dart';
 import 'services/word_service.dart';
+import 'screens/story_screen.dart';
 
 void main() {
   runApp(const SpellLearningGame());
@@ -103,6 +104,8 @@ class _SpellBookScreenState extends State<SpellBookScreen> {
       challengeWords.add(_allWords[(_currentWordIndex + i) % _allWords.length]);
     }
 
+    int storyIndex = _currentWordIndex ~/ 5;
+
     // Update index for next time (looping back if needed)
     setState(() {
       _currentWordIndex = (_currentWordIndex + 5) % _allWords.length;
@@ -114,6 +117,7 @@ class _SpellBookScreenState extends State<SpellBookScreen> {
         builder: (context) => LearningSessionScreen(
           words: challengeWords,
           isCursive: _isCursive,
+          storyIndex: storyIndex,
         ),
       ),
     );
@@ -199,15 +203,37 @@ class _SpellBookScreenState extends State<SpellBookScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton.icon(
-              onPressed: _startChallenge,
-              icon: const Icon(Icons.play_arrow, size: 32),
-              label: const Text('Start Challenge (5 Words)'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
+            child: Column(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: _startChallenge,
+                  icon: const Icon(Icons.play_arrow, size: 32),
+                  label: const Text('Start Challenge (5 Words)'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const StoryScreen(storyIndex: 0),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.auto_stories, size: 32),
+                  label: const Text('Story Watch'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(

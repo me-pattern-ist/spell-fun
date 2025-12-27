@@ -2,11 +2,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/word.dart';
+import 'story_screen.dart';
 
 class PuzzleScreen extends StatefulWidget {
   final List<Word> words;
+  final int storyIndex;
 
-  const PuzzleScreen({super.key, required this.words});
+  const PuzzleScreen({super.key, required this.words, required this.storyIndex});
 
   @override
   State<PuzzleScreen> createState() => _PuzzleScreenState();
@@ -53,11 +55,6 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
         // 3: Diagonal Up-Right (row--, col++)
         // 4: Diagonal Down-Left (row++, col--)
         // 5: Diagonal Up-Left (row--, col--)
-        // EXCLUDED: Horizontal Left-Right (row, col++)
-        // EXCLUDED: Horizontal Right-Left (row, col--) - though not explicitly banned, usually L-R is the main one to avoid if "no straight line" meant standard reading. 
-        // The prompt said: "up down, dignoal or down to up but not left to right in a straight line."
-        // I will interpret "not left to right" as strictly NO horizontal L->R. 
-        // I will also avoid R->L to be safe and stick to vertical/diagonal.
         
         int direction = random.nextInt(6); 
         int row = random.nextInt(gridSize);
@@ -112,8 +109,6 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
       
       if (!placed) {
         debugPrint("Could not place word: $word");
-        // Fallback: Just try to place it horizontally if all else fails? 
-        // Or restart? For now, we'll skip (rare with small words/large grid)
       }
     }
 
@@ -182,9 +177,15 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context); // Dialog
-              Navigator.pop(context); // Puzzle Screen
+              // Navigate to Story Screen
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StoryScreen(storyIndex: widget.storyIndex),
+                ),
+              );
             },
-            child: const Text('Finish'),
+            child: const Text('See Story!'),
           ),
         ],
       ),
