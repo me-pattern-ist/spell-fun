@@ -13,9 +13,10 @@ OLLAMA_MODEL = 'llama3.2:latest'
 SD_MODEL_ID = 'runwayml/stable-diffusion-v1-5'
 
 # Generation Settings
-CHUNK_SIZE = 5
-STORY_SENTENCE_COUNT = "4-6"
+CHUNK_SIZE = 20          # Words randomly selected per story
+STORY_WORD_COUNT = "80-100"  # Target word count for each story
 MAX_STORIES = 5
+NUM_IMAGES_PER_STORY = 2  # 2 images per story
 
 # Themes
 THEMES = [

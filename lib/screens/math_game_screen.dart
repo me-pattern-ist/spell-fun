@@ -18,19 +18,28 @@ class MathGameScreen extends StatefulWidget {
 class _MathGameScreenState extends State<MathGameScreen> {
   final MathService _mathService = MathService();
   late MathProblem _currentProblem;
-  List<int> _options = [];
+  List<String> _options = [];
   int _problemsSolved = 0;
   final int _totalProblems = 5;
   late FlutterTts _flutterTts;
   bool _isCorrect = false;
-  int? _selectedOption;
+  String? _selectedOption;
 
   @override
   void initState() {
     super.initState();
     _flutterTts = FlutterTts();
     _initTts();
-    _nextProblem();
+    _loadAndStart();
+  }
+
+  Future<void> _loadAndStart() async {
+    if (widget.operation == MathOperation.fractions) {
+      await _mathService.loadFractions();
+    }
+    if (mounted) {
+      _nextProblem();
+    }
   }
 
   Future<void> _initTts() async {
@@ -54,19 +63,39 @@ class _MathGameScreenState extends State<MathGameScreen> {
 
   void _generateOptions() {
     _options = [];
-    _options.add(_currentProblem.answer);
+    _options.add(_currentProblem.answerString);
     
     final random = Random();
     while (_options.length < 3) {
-      // Generate a random offset between -5 and 5 (excluding 0)
-      int offset = random.nextInt(10) - 5; 
-      if (offset == 0) offset = 1;
-      
-      int option = _currentProblem.answer + offset;
-      
-      // Ensure option is non-negative and unique
-      if (option >= 0 && !_options.contains(option)) {
-        _options.add(option);
+      if (widget.operation == MathOperation.fractions) {
+        // Generate random fraction options
+        // Parse current answer to get denominator
+        // Format: "num/den"
+        List<String> parts = _currentProblem.answerString.split('/');
+        int currentNum = int.parse(parts[0]);
+        int den = int.parse(parts[1]);
+        
+        int offset = random.nextInt(5) - 2; // -2 to 2
+        if (offset == 0) offset = 1;
+        
+        int newNum = currentNum + offset;
+        if (newNum < 1) newNum = 1; // Ensure positive
+        
+        String option = "$newNum/$den";
+        if (!_options.contains(option)) {
+          _options.add(option);
+        }
+      } else {
+        // Normal integer options
+        int offset = random.nextInt(10) - 5; 
+        if (offset == 0) offset = 1;
+        
+        int optionVal = _currentProblem.answer + offset;
+        
+        // Ensure option is non-negative and unique
+        if (optionVal >= 0 && !_options.contains(optionVal.toString())) {
+          _options.add(optionVal.toString());
+        }
       }
     }
     
@@ -74,16 +103,25 @@ class _MathGameScreenState extends State<MathGameScreen> {
   }
 
   Future<void> _speakProblem() async {
-    String opText = widget.operation == MathOperation.addition ? "plus" : "minus";
-    await _flutterTts.speak("${_currentProblem.val1} $opText ${_currentProblem.val2} equals?");
+    if (widget.operation == MathOperation.fractions) {
+       // "1 over 5 plus 2 over 5 equals?"
+       // Simple regex replace for speaking
+       String spoken = _currentProblem.customQuestion!
+           .replaceAll('/', ' over ')
+           .replaceAll('+', ' plus ');
+       await _flutterTts.speak("$spoken equals?");
+    } else {
+      String opText = widget.operation == MathOperation.addition ? "plus" : "minus";
+      await _flutterTts.speak("${_currentProblem.val1} $opText ${_currentProblem.val2} equals?");
+    }
   }
 
-  void _checkAnswer(int selectedOption) {
+  void _checkAnswer(String selectedOption) {
     setState(() {
       _selectedOption = selectedOption;
     });
 
-    if (selectedOption == _currentProblem.answer) {
+    if (selectedOption == _currentProblem.answerString) {
       _handleCorrect();
     } else {
       _flutterTts.speak("Try again!");
@@ -110,7 +148,14 @@ class _MathGameScreenState extends State<MathGameScreen> {
       _isCorrect = true;
       _problemsSolved++;
     });
-    _flutterTts.speak("Correct! The answer is ${_currentProblem.answer}");
+    
+    if (widget.operation == MathOperation.fractions) {
+       String spokenAns = _currentProblem.answerString.replaceAll('/', ' over ');
+       _flutterTts.speak("Correct! The answer is $spokenAns");
+    } else {
+       _flutterTts.speak("Correct! The answer is ${_currentProblem.answer}");
+    }
+
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) _nextProblem();
     });
@@ -156,23 +201,41 @@ class _MathGameScreenState extends State<MathGameScreen> {
             child: Container(
               padding: const EdgeInsets.all(30),
               child: Center(
-                child: Row(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '${_currentProblem.val1} ${_currentProblem.operatorSymbol} ${_currentProblem.val2} = ',
-                      style: GoogleFonts.comicNeue(fontSize: 60, fontWeight: FontWeight.bold),
-                    ),
-                    if (_isCorrect)
-                      Text(
-                        '${_currentProblem.answer}',
-                        style: GoogleFonts.comicNeue(fontSize: 60, color: Colors.green, fontWeight: FontWeight.bold),
-                      )
-                    else
-                      const Text(
-                        '?',
-                        style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.grey),
+                      _currentProblem.customQuestion != null 
+                          ? '${_currentProblem.customQuestion}'
+                          : '${_currentProblem.val1} ${_currentProblem.operatorSymbol} ${_currentProblem.val2} = ',
+                      style: GoogleFonts.comicNeue(
+                        fontSize: _currentProblem.customQuestion != null ? 32 : 60, 
+                        fontWeight: FontWeight.bold
                       ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (_currentProblem.customQuestion == null) ...[
+                      if (_isCorrect)
+                        Text(
+                          _currentProblem.answerString,
+                          style: GoogleFonts.comicNeue(fontSize: 60, color: Colors.green, fontWeight: FontWeight.bold),
+                        )
+                      else
+                        const Text(
+                          '?',
+                          style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold, color: Colors.grey),
+                        ),
+                    ] else ...[
+                       // For word problems, show answer below or inline if space permits
+                       if (_isCorrect)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Text(
+                            "Answer: ${_currentProblem.answerString}",
+                            style: GoogleFonts.comicNeue(fontSize: 40, color: Colors.green, fontWeight: FontWeight.bold),
+                          ),
+                        )
+                    ]
                   ],
                 ),
               ),
@@ -188,7 +251,7 @@ class _MathGameScreenState extends State<MathGameScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: _options.map((option) {
                   bool isSelected = _selectedOption == option;
-                  bool isCorrect = option == _currentProblem.answer;
+                  bool isCorrect = option == _currentProblem.answerString;
                   
                   Color btnColor = Colors.blue.shade100;
                   if (isSelected) {
@@ -208,7 +271,7 @@ class _MathGameScreenState extends State<MathGameScreen> {
                           elevation: 5,
                         ),
                         child: Text(
-                          '$option',
+                          option,
                           style: GoogleFonts.comicNeue(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,

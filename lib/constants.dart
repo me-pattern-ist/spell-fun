@@ -5,4 +5,4 @@ const double kTtsPitch = 1.0;
 const String kTtsLanguage = "en-US";
 
 // Math Configuration
-const int kMathMaxSum = 20;
+const int kMathMaxSum = 100;

@@ -1,9 +1,42 @@
 import 'dart:math';
+import 'package:flutter/services.dart' show rootBundle;
 import '../models/math_model.dart';
 import '../constants.dart';
 
 class MathService {
   final Random _random = Random();
+  List<MathProblem> _fractionProblems = [];
+
+  Future<void> loadFractions() async {
+    if (_fractionProblems.isNotEmpty) return;
+
+    try {
+      final String csvData = await rootBundle.loadString('assets/math_fractions.csv');
+      final List<String> lines = csvData.split('\n');
+      
+      for (String line in lines) {
+        if (line.trim().isEmpty) continue;
+        
+        final parts = line.split('|');
+        if (parts.length >= 2) {
+          final question = parts[0].trim();
+          final answer = parts[1].trim();
+          
+          _fractionProblems.add(MathProblem(
+            val1: 0, // Dummy
+            val2: 0, // Dummy
+            operation: MathOperation.fractions,
+            answer: 0, // Dummy
+            customQuestion: question,
+            answerString: answer,
+          ));
+        }
+      }
+      print("Loaded ${_fractionProblems.length} fraction problems.");
+    } catch (e) {
+      print("Error loading fractions: $e");
+    }
+  }
 
   MathProblem generateProblem(MathOperation operation) {
     int val1, val2, answer;
@@ -32,6 +65,31 @@ class MathService {
         answer = _random.nextInt(10); // 0-9
         val1 = answer * val2;
         break;
+      case MathOperation.fractions:
+        if (_fractionProblems.isNotEmpty) {
+          return _fractionProblems[_random.nextInt(_fractionProblems.length)];
+        }
+        
+        // Fallback if CSV not loaded or empty
+        int denominator = _random.nextInt(9) + 2; // 2-10
+        int num1 = _random.nextInt(denominator) + 1; // 1 to d
+        int num2 = _random.nextInt(denominator) + 1; // 1 to d
+        
+        val1 = num1;
+        val2 = num2;
+        answer = num1 + num2; 
+        
+        String question = "$num1/$denominator + $num2/$denominator";
+        String ansStr = "${num1 + num2}/$denominator";
+        
+        return MathProblem(
+          val1: val1,
+          val2: val2,
+          operation: operation,
+          answer: answer,
+          customQuestion: question,
+          answerString: ansStr,
+        );
     }
 
     return MathProblem(

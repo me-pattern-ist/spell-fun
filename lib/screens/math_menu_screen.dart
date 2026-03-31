@@ -28,6 +28,8 @@ class MathMenuScreen extends StatelessWidget {
               _buildMenuButton(context, 'Addition (+)', MathOperation.addition, Colors.orange),
               const SizedBox(height: 20),
               _buildMenuButton(context, 'Subtraction (-)', MathOperation.subtraction, Colors.blue),
+              const SizedBox(height: 20),
+              _buildMenuButton(context, 'Fractions (1/2)', MathOperation.fractions, Colors.purple),
               // Future: Multiplication, Division
             ],
           ),
