@@ -36,6 +36,8 @@ class _MathGameScreenState extends State<MathGameScreen> {
   Future<void> _loadAndStart() async {
     if (widget.operation == MathOperation.fractions) {
       await _mathService.loadFractions();
+    } else if (widget.operation == MathOperation.multiplication) {
+      await _mathService.loadMultiplication();
     }
     if (mounted) {
       _nextProblem();
@@ -103,15 +105,19 @@ class _MathGameScreenState extends State<MathGameScreen> {
   }
 
   Future<void> _speakProblem() async {
-    if (widget.operation == MathOperation.fractions) {
-       // "1 over 5 plus 2 over 5 equals?"
-       // Simple regex replace for speaking
-       String spoken = _currentProblem.customQuestion!
+    if (_currentProblem.customQuestion != null) {
+      if (widget.operation == MathOperation.fractions) {
+        String spoken = _currentProblem.customQuestion!
            .replaceAll('/', ' over ')
            .replaceAll('+', ' plus ');
-       await _flutterTts.speak("$spoken equals?");
+        await _flutterTts.speak("$spoken equals?");
+      } else {
+        await _flutterTts.speak(_currentProblem.customQuestion!);
+      }
     } else {
-      String opText = widget.operation == MathOperation.addition ? "plus" : "minus";
+      String opText = widget.operation == MathOperation.addition ? "plus" : 
+                      widget.operation == MathOperation.subtraction ? "minus" : 
+                      widget.operation == MathOperation.multiplication ? "times" : "divided by";
       await _flutterTts.speak("${_currentProblem.val1} $opText ${_currentProblem.val2} equals?");
     }
   }
@@ -149,7 +155,7 @@ class _MathGameScreenState extends State<MathGameScreen> {
       _problemsSolved++;
     });
     
-    if (widget.operation == MathOperation.fractions) {
+    if (_currentProblem.customQuestion != null) {
        String spokenAns = _currentProblem.answerString.replaceAll('/', ' over ');
        _flutterTts.speak("Correct! The answer is $spokenAns");
     } else {

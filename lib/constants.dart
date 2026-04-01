@@ -6,3 +6,5 @@ const String kTtsLanguage = "en-US";
 
 // Math Configuration
 const int kMathMaxSum = 100;
+const int kMaxSubtractionSum = 10;
+const int kMaxMultiplicationTable = 5;

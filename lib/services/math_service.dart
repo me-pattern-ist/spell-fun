@@ -6,6 +6,38 @@ import '../constants.dart';
 class MathService {
   final Random _random = Random();
   List<MathProblem> _fractionProblems = [];
+  List<MathProblem> _multiplicationProblems = [];
+
+  Future<void> loadMultiplication() async {
+    if (_multiplicationProblems.isNotEmpty) return;
+
+    try {
+      final String csvData = await rootBundle.loadString('assets/math_multiplication.csv');
+      final List<String> lines = csvData.split('\n');
+      
+      for (String line in lines) {
+        if (line.trim().isEmpty) continue;
+        
+        final parts = line.split('|');
+        if (parts.length >= 2) {
+          final question = parts[0].trim();
+          final answer = parts[1].trim();
+          
+          _multiplicationProblems.add(MathProblem(
+            val1: 0, // Dummy
+            val2: 0, // Dummy
+            operation: MathOperation.multiplication,
+            answer: 0, // Dummy
+            customQuestion: question,
+            answerString: answer,
+          ));
+        }
+      }
+      print("Loaded ${_multiplicationProblems.length} multiplication problems.");
+    } catch (e) {
+      print("Error loading multiplication: $e");
+    }
+  }
 
   Future<void> loadFractions() async {
     if (_fractionProblems.isNotEmpty) return;
@@ -49,13 +81,16 @@ class MathService {
         answer = val1 + val2;
         break;
       case MathOperation.subtraction:
-        // Max number controlled by constant
-        val1 = _random.nextInt(kMathMaxSum + 1); // 0 to Max
+        // Max number controlled by specific subtraction constant
+        val1 = _random.nextInt(kMaxSubtractionSum + 1); // 0 to Max
         val2 = _random.nextInt(val1 + 1); // 0 to val1 (ensure non-negative)
         answer = val1 - val2;
         break;
       case MathOperation.multiplication:
-        val1 = _random.nextInt(10);
+        if (_multiplicationProblems.isNotEmpty) {
+          return _multiplicationProblems[_random.nextInt(_multiplicationProblems.length)];
+        }
+        val1 = _random.nextInt(kMaxMultiplicationTable) + 1; // 1 to table limit
         val2 = _random.nextInt(10);
         answer = val1 * val2;
         break;
